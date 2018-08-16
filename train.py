@@ -197,7 +197,7 @@ if __name__ == '__main__':
                     vis.line(loss_coords,X=np.array([0]),win='loss_coords',opts=dict(title='coords_loss'))
                     vis.line(loss_classes,X=np.array([0]),win='loss_classes',opts=dict(title='classes_loss'))
         weightname = backupdir + '/' + netname + '-epoch' + str(j) + '.weight'
-        if j%40 == 0:
+        if j%10 == 0:
             model.save_weights(weightname)
         iou_epoch = iou_epoch / timesPerEpoch
         class_epoch = class_epoch / timesPerEpoch

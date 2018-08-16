@@ -104,7 +104,7 @@ class CostYoloV2(nn.Module):
         self.obj_pred_count = 0
         self.anchors = RegionLayer.anchors
         self.object_scale = RegionLayer.object_scale
-        self.noobject_scale = RegionLayer.noobject_scale
+        self.noobject_scale = RegionLayer.noobject_scale * 0.5
         self.class_scale = RegionLayer.class_scale
         self.coord_scale = RegionLayer.coord_scale
         self.classes = RegionLayer.classes
@@ -205,15 +205,17 @@ class CostYoloV2(nn.Module):
                 #find the best iou for the current label
                 box_truth_shift = box_truth
                 box_truth_shift = box_truth_shift.clone()
-                box_truth_shift[0] = 0.0
-                box_truth_shift[1] = 0.0
+                #box_truth_shift[0] = 0.0
+                #box_truth_shift[1] = 0.0
                 box_pred_shift_l = []
                 for n in range(self.num):
                     box_pred = x_b[(n*self.anchor_len):(n*self.anchor_len+4), j, i].view(4)
                     box_pred = box_pred.clone()
                     box_pred_shift = box_pred
-                    box_pred_shift[0] = 0.0
-                    box_pred_shift[1] = 0.0
+                    #box_pred_shift[0] = 0.0
+                    #box_pred_shift[1] = 0.0
+                    box_pred_shift[0] = (box_pred_shift[0] + i)/in_width
+                    box_pred_shift[1] = (box_pred_shift[1] + j)/in_height
                     box_pred_shift[2] = torch.exp(box_pred_shift[2]) * (self.anchors[n*2]/in_width)
                     box_pred_shift[3] = torch.exp(box_pred_shift[3]) * (self.anchors[n*2 + 1]/in_height)
                     box_pred_shift_l.append(box_pred_shift.view(1,4))
@@ -285,7 +287,7 @@ class CostYoloV2(nn.Module):
         pred_fy = torch.cat(euler_pred_list, 0)
         truth_fy = torch.cat(euler_truth_list, 0)
         truth_fy = truth_fy.detach()
-        self.loss_fy = mse(pred_fy, truth_fy) * self.coord_scale 
+        self.loss_fy = mse(pred_fy, truth_fy) * self.coord_scale * 2
 
         pred_classes = torch.cat(classes_pred_list, 0)
         truth_classes = torch.cat(classes_truth_list, 0)
